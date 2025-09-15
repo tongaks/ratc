@@ -1,0 +1,9 @@
+#fan_logo {
+	animation: rotate_fan 1s linear infinite
+}
+
+@keyframes rotate_fan {
+	100% {
+		transform: rotate(360deg);
+	}
+}
