@@ -14,6 +14,7 @@ export async function GET(request: NextRequest) {
 
 			if (doc.exists) {
 				const setDoc = db.collection('clients').doc(clientID).set({
+					ID: clientID,
 					status: clientStatus,
 				});
 			}
