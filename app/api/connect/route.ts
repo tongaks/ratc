@@ -23,11 +23,11 @@ export async function GET(request: NextRequest) {
 
 				const createDoc = db.collection('clients').doc(clientID).set({
 					ID: clientID,
-					Status: clientStatus,
-				});
-
-				console.log("Client document ID: ", createDoc.id);
+					status: clientStatus,
+				}); console.log("Client document ID: ", createDoc.id);
 			}
+
+
 
 		} else console.err('Invalid parameters.');
 

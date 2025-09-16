@@ -4,7 +4,7 @@ import { NextResponse, NextRequest } from 'next/server';
 export async function GET(request: NextRequest) {
 	const searchParams = request.nextUrl.searchParams;
 	const clientID = searchParams.get('ID');
-	const clientStatus = searchParams.get('status');
+	let clientStatus = '';
 
 	try {
 
@@ -13,9 +13,8 @@ export async function GET(request: NextRequest) {
 			const doc = await docRef.get();
 
 			if (doc.exists) {
-				const setDoc = db.collection('clients').doc(clientID).set({
-					status: clientStatus,
-				});
+				clientStatus = doc.get('status');
+				console.log('client ID: ' + clientID + ' status: ' + clientStatus);
 			}
 
 
@@ -26,5 +25,5 @@ export async function GET(request: NextRequest) {
 		return new NextResponse("Failed", {status: 404, headers: {"Content-Type": "text/plain"},});
 	}
 
-	return new NextResponse("OK", {status: 200, headers: {"Content-Type": "text/plain"},});
+	return new NextResponse(clientStatus, {status: 200, headers: {"Content-Type": "text/plain"},});
 }

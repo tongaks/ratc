@@ -10,14 +10,15 @@ type FanObject = {
 
 export default function ControlPage() {
   const [fanObjects, setFanObjects] = useState<FanObject[]>([]); 
+  const [currentStatus, setCurrentStatus] = useState('');
 
   // use effect for when the nodemcu 
   // connects to the vercel server via fetch
   // when fetching "connect" api, add new object to an array
 
   // this for fetching clients in firebase db
-  useEffect(()=>{
-  }, []);
+  // useEffect(()=>{
+  // }, []);
 
   async function StopFan(event) {
     const parent = event.currentTarget.parentNode;
@@ -25,6 +26,8 @@ export default function ControlPage() {
     fan_image.id = (fan_image.id == "") ? styles.fan_logo : "";
 
     // create an api for updating status of fans
+    const resUpdate = await fetch('/api/update?ID=12343&status=OFF');
+    const output = resUpdate.text();
   }
 
   return (<>
