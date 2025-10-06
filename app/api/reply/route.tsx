@@ -1,14 +1,14 @@
 import { db } from '@/firebase/firebaseAdmin';
 import { NextResponse, NextRequest } from 'next/server';
 
-export async function GET(request: NextRequest) {
+export async function POST(request: NextRequest) {
 	const searchParams = request.nextUrl.searchParams;
 	const clientID = searchParams.get('ID');
-	const clientStatus = searchParams.get('status');
+	const clientReply = searchParams.get('reply');
 
 	try {
 
-		if (clientID) {
+		if (clientID && clientReply) {
 			const docRef = db.collection('clients').doc(clientID);
 			const doc = await docRef.get();
 

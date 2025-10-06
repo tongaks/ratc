@@ -11,6 +11,7 @@ export async function GET(request: NextRequest) {
 	const searchParams = request.nextUrl.searchParams;
 	const clientID = searchParams.get('ID');
 	const clientStatus = searchParams.get('status');
+	const clientType = searchParams.get('type');
 
 	try {
 
@@ -25,8 +26,12 @@ export async function GET(request: NextRequest) {
 					ID: clientID,
 					status: clientStatus,
 				}); console.log("Client document ID: ", createDoc.id);
-			}
 
+			} else {
+				await db.collection('clients').doc(clientID).update({
+				  connected: true,
+				});
+			}
 
 
 		} else console.err('Invalid parameters.');

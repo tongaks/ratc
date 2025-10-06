@@ -25,5 +25,5 @@ export async function GET(request: NextRequest) {
 		return new NextResponse("Failed", {status: 404, headers: {"Content-Type": "text/plain"},});
 	}
 
-	return new NextResponse(clientStatus, {status: 200, headers: {"Content-Type": "text/plain"},});
+	return new NextResponse(clientID + "," + clientStatus, {status: 200, headers: {"Content-Type": "text/plain"},});
 }

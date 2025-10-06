@@ -13,8 +13,8 @@ export async function GET(request: NextRequest) {
 			const doc = await docRef.get();
 
 			if (doc.exists) {
-				const setDoc = db.collection('clients').doc(clientID).set({
-					status: clientStatus,
+				await db.collection('clients').doc(clientID).update({
+				  status: clientStatus,
 				});
 			}
 
