@@ -4,7 +4,6 @@ import { NextResponse, NextRequest } from 'next/server';
 export async function GET(request: NextRequest) {
 	const searchParams = request.nextUrl.searchParams;
 	const clientID = searchParams.get('ID');
-	let clientStatus = '';
 
 	try {
 
@@ -13,10 +12,11 @@ export async function GET(request: NextRequest) {
 			const doc = await docRef.get();
 
 			if (doc.exists) {
-				clientStatus = doc.get('status');
-				// console.log('client ID: ' + clientID + ' status: ' + clientStatus);
+				// const reply = doc.reply;
+				const data = doc.data();
+				const reply = data?.reply;
+				return new NextResponse(reply, {status: 200, headers: {"Content-Type": "text/plain"},});
 			}
-
 
 		} else console.err('Invalid parameters.');
 
@@ -24,6 +24,4 @@ export async function GET(request: NextRequest) {
 		console.error("Error getting client: ", err);
 		return new NextResponse("Failed", {status: 404, headers: {"Content-Type": "text/plain"},});
 	}
-
-	return new NextResponse(clientID + "," + clientStatus, {status: 200, headers: {"Content-Type": "text/plain"},});
 }

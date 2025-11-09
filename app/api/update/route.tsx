@@ -14,7 +14,9 @@ export async function GET(request: NextRequest) {
 
 			if (doc.exists) {
 				await db.collection('clients').doc(clientID).update({
+				  current_status: clientStatus,
 				  status: clientStatus,
+				  reply: "",
 				});
 			}
 

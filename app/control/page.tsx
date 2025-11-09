@@ -1,6 +1,7 @@
 'use client'
 import styles from './animation.module.css';
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
 type ClientObject = {
@@ -13,41 +14,43 @@ export default function ControlPage() {
   const [fanObjects, setFanObjects] = useState<ClientObject[]>([]); 
   const [computerObjects, setComputerObjects] = useState<ClientObject[]>([]); 
   const [currentStatus, setCurrentStatus] = useState('');
+  const router = useRouter();
 
   // use effect for when the nodemcu 
   // connects to the vercel server via fetch
   // when fetching "connect" api, add new object to an array
 
   // this for fetching clients in firebase db
-  useEffect(()=>{
-    const getClients = async ()=> {
-      const resUpdate = await fetch('/api/get_client');
-      const clientJson = await resUpdate.json();
+  const getClients = async ()=> {
+    setFanObjects([]);
+    setComputerObjects([]);
 
-      if (!clientJson.error) {
+    const resUpdate = await fetch('/api/get_client');
+    const clientJson = await resUpdate.json();
 
-        clientJson.forEach(doc => {
+    if (!clientJson.error) {
 
-          // seperate "fan" from "computers"
-          console.log("client: " + doc.ID +" is connected: " + doc.connected);
+      clientJson.forEach(doc => {
 
-          if (doc.type == "fan" && doc.connected) {
-            setFanObjects(prev => [...prev, {ID: doc.ID, status: doc.status, type: doc.type}]);
-          } else {
-            if (doc.connected) {
-              console.log(doc.type);
-              setComputerObjects(prev => [...prev, {ID: doc.ID, status: doc.status, type: doc.type}]);
-            }
+        // seperate "fan" from "computers"
+        console.log("client: " + doc.ID +" is connected: " + doc.connected);
+
+        if (doc.type == "fan" && doc.connected) {
+          setFanObjects(prev => [...prev, {ID: doc.ID, status: doc.status, type: doc.type}]);
+        } else {
+          if (doc.connected) {
+            console.log(doc.type);
+            setComputerObjects(prev => [...prev, {ID: doc.ID, status: doc.status, type: doc.type}]);
           }
+        }
 
-        });
-        console.log('Clients retrieved.');
+      });
+      console.log('Clients retrieved.');
 
-      } else console.log('Error on retrieving clients: ', clientJson.error);
-    }
+    } else console.log('Error on retrieving clients: ', clientJson.error);
+  }
 
-    getClients();
-  }, []);
+  useEffect(()=>{ getClients(); }, []);
 
   async function StopFan(event: React.MouseEvent<HTMLDivElement>, fan: ClientObject) {
     // get the fan object icon 
@@ -74,19 +77,42 @@ export default function ControlPage() {
   async function HandlePowerButtons(cmd: string, id: ClientObject) {
     const resUpdate = await fetch('/api/update?ID=' + id.ID + '&status=' + cmd);
     const output = await resUpdate.text();
-    console.log("result from HandlePowerButtons: " + output);
-  }    
+
+    // get the reply of the client
+    // const fetchReply = await fetch('/api/fetch_reply?ID=' + id.ID);
+    // const reply = await fetchReply.text();
+    // console.log("Reply of the client: " + reply);
+
+    async function waitForReply() {
+      while (true) {
+        const res = await fetch('/api/fetch_reply?ID=' + id.ID);
+        const reply = await res.text();
+
+        if (reply === "CL") {
+          console.log("Client disconnected: " + id.ID);
+          getClients()
+          router.refresh();
+          
+          break;
+        }
+
+        await new Promise(r => setTimeout(r, 1000)); // wait 1 second
+      }
+    }
+
+    waitForReply();
+  }
 
   return (
 <div className="flex justify-center gap-12 p-8 flex-wrap">
 
   {/* Fans Section */}
   <div className="bg-stone-700 p-6 rounded-2xl shadow-xl min-w-[400px] min-h-[400px] w-fit h-fit">
-    <h2 className="text-center text-white text-xl font-bold mb-4">Fans</h2>
+    <h2 className="text-center text-white text-xl font-bold mb-4 select-none">Fans</h2>
 
     {(!fanObjects || fanObjects.length === 0) ? (
       <div className="flex items-center justify-center h-[300px]">
-        <h1 className="text-white text-center">No connected device</h1>
+        <h1 className="text-white text-center select-none">No connected device</h1>
       </div>
     ) : (
       <div className="flex flex-wrap justify-center gap-4">
@@ -109,7 +135,7 @@ export default function ControlPage() {
 
   {/* Computers Section */}
   <div className="bg-stone-700 p-6 rounded-2xl shadow-xl min-w-[400px] min-h-[400px] w-fit h-fit">
-    <h2 className="text-center text-white text-xl font-bold mb-4">Computers</h2>
+    <h2 className="text-center text-white text-xl font-bold mb-4 select-none">Computers</h2>
 
     {(!computerObjects || computerObjects.length === 0) ? (
       <div className="flex items-center justify-center h-[300px]">
